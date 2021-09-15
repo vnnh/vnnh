@@ -5,34 +5,14 @@ import livereload from "rollup-plugin-livereload";
 import css from "rollup-plugin-css-only";
 import replace from "rollup-plugin-replace";
 import { terser } from "rollup-plugin-terser";
+import analyze from "rollup-plugin-analyzer";
 
 const production = !process.env.ROLLUP_WATCH;
-
-function serve() {
-	let server;
-
-	function toExit() {
-		if (server) server.kill(0);
-	}
-
-	return {
-		writeBundle() {
-			if (server) return;
-			server = require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
-				stdio: ["ignore", "inherit", "inherit"],
-				shell: true,
-			});
-
-			process.on("SIGTERM", toExit);
-			process.on("exit", toExit);
-		},
-	};
-}
 
 export default {
 	input: "src/main.tsx",
 	output: {
-		sourcemap: true,
+		sourcemap: !production,
 		format: "iife",
 		name: "app",
 		file: "public/build/bundle.js",
@@ -45,9 +25,9 @@ export default {
 		resolve({ browser: true }),
 		commonjs(),
 		typescript({ sourceMap: !production, inlineSources: !production }),
-		!production && serve(),
 		!production && livereload(),
 		production && terser(),
+		analyze({ summaryOnly: true }),
 	],
 	watch: {
 		clearScreen: false,
