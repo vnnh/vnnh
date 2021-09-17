@@ -1,11 +1,7 @@
-import sys
 from flask import Flask
 from flask.helpers import send_from_directory
-from livereload import Server
 
-app = Flask(__name__, static_folder="../public")
-
-DEBUG = len(sys.argv) >= 2 and sys.argv[1] == "--dev"
+app = Flask(__name__, static_folder="../out")
 
 
 @app.route("/", defaults={"path": ""})
@@ -13,7 +9,7 @@ DEBUG = len(sys.argv) >= 2 and sys.argv[1] == "--dev"
 def catch_all(path):
     print("You want path: %s" % path)
     if path.find(".") != -1:
-        if not DEBUG and path.find(".map") != -1:
+        if path.find(".map") != -1:
             return ("", 204)
 
         print("resource request")
@@ -23,9 +19,4 @@ def catch_all(path):
 
 
 if __name__ == "__main__":
-    if DEBUG:
-        server = Server(app.wsgi_app)
-        server.watch("public")
-        server.serve()
-    else:
-        app.run()
+    app.run()
